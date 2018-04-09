@@ -1,3 +1,9 @@
+/* 
+ * flashing_text.hpp:
+ * derrived class of aligned_text that can flash
+ * used in the game to signal some value has changed
+ */
+
 #ifndef _FLASHING_TEXT_HPP
 #define _FLASHING_TEXT_HPP
 
@@ -5,22 +11,26 @@
 
 using flash_mode_t=int;
 
+// the mode of a flash, to be ORed together
+// e.g. flash_mode::thrice | flash_mode::quick means three quick flashes
 namespace flash_mode {
-	const flash_mode_t none=0b000;
-	const flash_mode_t indefinite=0b001;
-	const flash_mode_t one_shot=0b010;
-	const flash_mode_t thrice=0b011;
-	const flash_mode_t slow=0b000;
-	const flash_mode_t quick=0b100;
+	const flash_mode_t none=0b000; // do not flash
+	const flash_mode_t indefinite=0b001; // flash for ever
+	const flash_mode_t one_shot=0b010; // flash once
+	const flash_mode_t thrice=0b011; // flash three times
+	const flash_mode_t slow=0b000; // flash slowely approx at 1Hz
+	const flash_mode_t quick=0b100; // flash quickly approx at 5Hz
 
 	const flash_mode_t duration_mask=0b011;
 	const flash_mode_t speed_mask=0b100;
 };
 
+// a derrived aligned_text that can flash
 class flashing_text : public aligned_text {
 public:
 	flashing_text()=default;
 
+	// initialize base
 	flashing_text(
 			const sf::FloatRect& bounds,
 			const sf::Font& font,
@@ -32,6 +42,8 @@ public:
 			set_flash_mode(mode);
 		}
 
+	// set the current flash mode
+	// determines the state change initiated by the flash_mode_t mask
 	void set_flash_mode(flash_mode_t what) {
 		_flash_mode = what;
 		_flash_timer = 0.0f;
@@ -81,12 +93,15 @@ public:
 			_flash_timer = 0.0f;
 			_flash_visible = !_flash_visible;
 
-			if (_flash_cycle > 0) // prevent an overflow
+			// prevent an overflow
+			if (_flash_cycle > 0)
 				_flash_cycle--;
 		}
 	}
 
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override {
+
+		// when it comes down to it, only visible dependent on the state boolean
 		if (_flash_visible)
 			target.draw(this->_text);
 	}

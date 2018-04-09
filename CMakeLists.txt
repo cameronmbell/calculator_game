@@ -32,7 +32,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules" ${CMAKE_MODULE_PATH})
 # target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
 
 # need SFML for cross-platform graphics, sound and windowing
-find_package(SFML 2 REQUIRED COMPONENTS network audio graphics window system)
+find_package(SFML 2 REQUIRED COMPONENTS graphics window system)
 
 if (SFML_FOUND)
 	include_directories(${SFML_INCLUDE_DIR})

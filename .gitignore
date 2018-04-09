@@ -1,5 +1,7 @@
 [Bb]uild/
 [Bb]ackup/
+[Ww]in32/
+[Ww]in64/
 
 CMakeCache.txt
 CMakeFiles

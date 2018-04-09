@@ -1,4 +1,10 @@
+/*
+ * core.cpp:
+ * disptach events on update and make calls to runnable object
+ */
+
 #include "core.hpp"
+#include "event.hpp"
 
 namespace core {
 	void run(runnable& r) {
@@ -8,6 +14,9 @@ namespace core {
 
 		bool running = true;
 		while (running) {
+
+			// dispatch SFML driven events through the event manager
+			// these can be handled by any class for whatever reason
 			auto e = sf::Event();
 			while (win->pollEvent(e)) {
 				switch (e.type) {
@@ -87,10 +96,9 @@ namespace core {
 				}
 			}
 
+			// draw and recalculate dt
 			win->clear(sf::Color::Black);
-
 			r.update(win.get(), clk.restart().asSeconds());
-
 			win->display();
 		}
 	}

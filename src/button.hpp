@@ -1,25 +1,31 @@
+/*
+ * button.hpp:
+ * defines a generic renderable button with state fading and style objects
+ */
+
 #ifndef _BUTTON_HPP
 #define _BUTTON_HPP
 
 #include <SFML/Graphics.hpp>
 
-#include <iostream>
 #include <unordered_map>
+#include <iostream>
 
 #include "event.hpp"
 #include "text.hpp"
 
+// state of a button used to determines it's colour
 enum class button_state {
 	hover,
 	click,
 	normal
 };
 
+// a button style object outlining generic reusable properties
 struct button_style {
 	text_align_t text_alignment;
 	sf::Color text_colour;
-	unsigned int text_size;
-
+	
 	sf::Color outline_colour;
 	float outline_thickness;
 
@@ -32,6 +38,8 @@ struct button_style {
 	static const button_style default_grey;
 };
 
+// the button class 
+// which listenes to SFML mouse events for state changes
 class basic_button :
 	public sf::Drawable,
 	public event::class_listener<
@@ -40,14 +48,18 @@ class basic_button :
 		event::sf_event::MouseButtonReleased> {
 
 public:
+	// default to grey style if no params are passed
+	// this is nesicarry because else an array of buttons cannot be implcitly initilized
 	basic_button() : basic_button(button_style::default_grey) { }
 
+	// construct state
 	basic_button(const button_style& style)
 		: _state(button_state::normal), _shape(), _text(), _enabled(true), _fade_progress(1.0f) {
 		set_style(style);
 		set_state(button_state::normal);
 	};
 
+	// change attributes of member text and rect
 	void set_style(button_style style) {
 		_style = style;
 
@@ -66,7 +78,7 @@ public:
 	void set_state(button_state state) {
 		_state = state;
 
-		if (_style.fade_time <= 0.0f) // do not fade !
+		if (_style.fade_time <= 0.0f) // do not fade
 			_shape.setFillColor(_style.fill_colour.at(_state));
 		else {
 			_rect_target_colour = _style.fill_colour.at(_state);
@@ -74,8 +86,8 @@ public:
 		}
 	}
 
-	void set_font(const sf::Font& font) {
-		_text.set_font(font, _style.text_size);
+	void set_font(const sf::Font& font, unsigned int size=24) {
+		_text.set_font(font, size);
 	}
 
 	void set_bounds(const sf::FloatRect& bounds) {

@@ -1,3 +1,11 @@
+/* 
+ * manager.hpp:
+ * manage the game, that is:
+ * - levels
+ * - operations
+ * - text
+ */
+
 #ifndef _MANAGER_HPP
 #define _MANAGER_HPP
 

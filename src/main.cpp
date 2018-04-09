@@ -1,32 +1,38 @@
+/* 
+ * main.cpp:
+ * manages rendering the game and maintaining the render window
+ * does so by listening to events posted by the manager and reacting
+ */
+
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
-#include <SFML/Audio.hpp>
 
-#include <thread>
+#include <array>
 #include <vector>
 
 #include "flashing_text.hpp"
 #include "operation.hpp"
 #include "resource.hpp"
 #include "manager.hpp"
-#include "button.hpp"
 #include "core.hpp"
 #include "util.hpp"
 
+// class resonsible for rendering the game
+// instantiated and called by core.hpp
 class game_renderer :
 	public core::runnable,
-	public event::class_listener<
-		event::sf_event::Resized, // window resize - stop this from happening
-		event::sf_event::KeyPressed, // key press - simulate button hover
-		event::sf_event::KeyReleased, // key release - simulate button click
-		posts::display_event<posts::display_event_mode::normal_text>, // operation/button update - redraw
-		posts::display_event<posts::display_event_mode::tutorial_text>, // operation/button update - redraw
-		posts::display_event<posts::display_event_mode::operations_central>, // operation/button update - redraw
-		posts::display_event<posts::display_event_mode::operations_aux>, // update text - redraw
-		posts::display_event<posts::display_event_mode::operations_redraw>, // update text - redraw
-		posts::display_event<posts::display_event_mode::disable>> { // operation/button update - redraw
+	public event::class_listener< // all the following events (posted by manager.hpp) are captured
+	event::sf_event::Resized, // prevent window resize
+	event::sf_event::KeyPressed, // simulate button hover on window key press
+	event::sf_event::KeyReleased, // simulate button click on window key release
+	posts::display_event<posts::display_event_mode::normal_text>, // modify primary/moves/level/target text
+	posts::display_event<posts::display_event_mode::tutorial_text>, // modify line1/line2/level text
+	posts::display_event<posts::display_event_mode::operations_aux>, // replace existing auxilery buttons
+	posts::display_event<posts::display_event_mode::operations_central>, // replace existing central buttons
+	posts::display_event<posts::display_event_mode::operations_redraw>, // re-calculate button strings
+	posts::display_event<posts::display_event_mode::disable>> { // disable tutorial/numeric text objects
 
-	using opbtn=operational_button;
+	using opbtn = operational_button;
 
 private:
 	std::array<operational_button, 6> _cental_btns;
@@ -35,18 +41,17 @@ private:
 	flashing_text _tutorial_textl1, _tutorial_textl2;
 
 	template <typename T>
-	void _set_buttons(T& which, make_operations::type to) { // unnecessary data cpy
+	void _set_buttons(T& which, make_operations::type to) {
 		for (auto& it : which)
 			it.remove_operation();
 
-		for (std::size_t i = 0; i < std::min(to.size(), which.size()); i++) {
-			which[i].set_operation(to[i]); // should use nice alignment algorithm
-		}
+		for (std::size_t i = 0; i < std::min(to.size(), which.size()); i++)
+			which[i].set_operation(to[i]);
 	}
 
 public:
 
-	game_renderer() { }
+	game_renderer()=default;
 
 	virtual std::unique_ptr<sf::RenderWindow> setup() override {
 		sf::ContextSettings cset;
@@ -62,32 +67,38 @@ public:
 
 		auto win = util::make_unique<sf::RenderWindow>(vmode, "my_game", sf::Style::Titlebar | sf::Style::Close, cset);
 
+		// optimial resolution for text rendering (as tested) is 640x480
+		// hence 0.5 * ((x/640) + (y/480))
+		// hence (2x + 4y) / 1920*2
+		float font_scale_factor = (3.0f * win->getSize().x + 4.0f * win->getSize().x) / 3840.0f;
+
+		// set the window favicon from loaded favicon file - see int main()
 		auto& favicon = resource_manager<sf::Image>::get("favicon");
 		win->setIcon(favicon.getSize().x, favicon.getSize().y, favicon.getPixelsPtr());
 
-		// some digusting position calculations follow
-		// creating a scene graph binary file format to store this info
-		// is just too much work so fuck it...
+		// some position calculations for buttons and text
+		// it's messy but creating a scene graph binary is too complex
+
 		for (std::size_t i = 0; i < _cental_btns.size(); i++) {
 			_cental_btns[i].set_style(button_style::default_grey);
-			_cental_btns[i].set_font(resource_manager<sf::Font>::get("roboto"));
+			_cental_btns[i].set_font(resource_manager<sf::Font>::get("roboto"), static_cast<unsigned int>(48 * font_scale_factor));
 			_cental_btns[i].set_bounds(sf::FloatRect(
-					(i / 3) * (win->getSize().x / 3),
-					(win->getSize().y / 4) * (1 + (i % 3)),
-					win->getSize().x / 3, win->getSize().y / 4));
+				(i / 3) * (win->getSize().x / 3),
+				(win->getSize().y / 4) * (1 + (i % 3)),
+				win->getSize().x / 3, win->getSize().y / 4));
 		}
 
 		for (std::size_t i = 0; i < _aux_btns.size(); i++) {
 			_aux_btns[i].set_style(button_style::default_orange);
-			_aux_btns[i].set_font(resource_manager<sf::Font>::get("roboto"));
+			_aux_btns[i].set_font(resource_manager<sf::Font>::get("roboto"), static_cast<unsigned int>(48 * font_scale_factor));
 			_aux_btns[i].set_bounds(sf::FloatRect(
-					(2 * win->getSize().x) / 3,
-					(win->getSize().y / 4) * (1 + (i % 3)),
-					win->getSize().x / 3, win->getSize().y / 4));
+				(2 * win->getSize().x) / 3,
+				(win->getSize().y / 4) * (1 + (i % 3)),
+				win->getSize().x / 3, win->getSize().y / 4));
 		}
 
 		for (auto it : { &_primary, &_moves, &_level, &_target, &_tutorial_textl1, &_tutorial_textl2 }) {
-			it->set_font(resource_manager<sf::Font>::get("roboto"), 18);
+			it->set_font(resource_manager<sf::Font>::get("roboto"), static_cast<unsigned int>(18 * font_scale_factor));
 			it->set_bounds(sf::FloatRect(16, 16, win->getSize().x - 32, win->getSize().y / 4 - 32));
 			it->set_flash_mode(flash_mode::none);
 			it->set_colour(sf::Color::White);
@@ -101,19 +112,22 @@ public:
 		_tutorial_textl1.set_alignment(text_align::right | text_align::center);
 		_tutorial_textl2.set_alignment(text_align::right | text_align::bottom);
 
-		_tutorial_textl1.set_font_size(36);
-		_tutorial_textl2.set_font_size(36);
-		_primary.set_font_size(108);
+		_tutorial_textl1.set_font_size(static_cast<unsigned int>(36 * font_scale_factor));
+		_tutorial_textl2.set_font_size(static_cast<unsigned int>(36 * font_scale_factor));
+		_primary.set_font_size(static_cast<unsigned int>(108 * font_scale_factor));
 
+		// bootstrap the level manager
 		level::load();
 
 		return win;
 	}
 
 	virtual void update(sf::RenderWindow* rw, float dt) override {
-		for (auto& it: _aux_btns) { it.fade(dt); rw->draw(it); }
-		for (auto& it: _cental_btns) { it.fade(dt); rw->draw(it); }
+		// draw buttons and 'fade' them. i.e. update their hover/press state
+		for (auto& it : _aux_btns) { it.fade(dt); rw->draw(it); }
+		for (auto& it : _cental_btns) { it.fade(dt); rw->draw(it); }
 
+		// for a numeric level render primary/moves/target/level text
 		if (level::last_mode() == level::mode::numeric) {
 			_moves.update(dt); rw->draw(_moves);
 			_target.update(dt); rw->draw(_target);
@@ -121,27 +135,33 @@ public:
 			_primary.update(dt); rw->draw(_primary);
 		}
 
+		// for a tutorial level render line1/line2/level text
 		if (level::last_mode() == level::mode::tutorial) {
 			_tutorial_textl1.update(dt); rw->draw(_tutorial_textl1);
 			_tutorial_textl2.update(dt); rw->draw(_tutorial_textl2);
 			_level.update(dt); rw->draw(_level);
 		}
-	};
+	}; 
 
+	// replace existing central buttons
 	virtual void listen(const posts::display_event<posts::display_event_mode::operations_central>& t) override {
 		_set_buttons(_cental_btns, t.operations);
 	}
 
+	// replace existing auxilery buttons
 	virtual void listen(const posts::display_event<posts::display_event_mode::operations_aux>& t) override {
 		_set_buttons(_aux_btns, t.operations);
 	}
 
+	// re-calculate button strings
 	virtual void listen(const posts::display_event<posts::display_event_mode::operations_redraw>& t) override {
 		for (auto& i : _cental_btns) i.set_string(i.get_string());
 		for (auto& i : _aux_btns) i.set_string(i.get_string());
 	}
 
+	// disable tutorial/numeric text objects
 	virtual void listen(const posts::display_event<posts::display_event_mode::disable>& t) override {
+
 		// only handles enable/disable for central buttons
 		for (auto& i : _cental_btns) {
 			if (t.to) i.disable();
@@ -149,6 +169,7 @@ public:
 		}
 	}
 
+	// modify primary/moves/level/target text
 	virtual void listen(const posts::display_event<posts::display_event_mode::normal_text>& t) override {
 		_level.set_string(t.level);
 		_moves.set_string(t.moves);
@@ -161,6 +182,9 @@ public:
 		_target.set_flash_mode(t.target_mode);
 	}
 
+	// modify line1/line2/level text
+	// also needs to calculate line spacing
+	// e.g. how do you optimally split "the quick brown fox jumped over the lazy dog" over N lines?
 	virtual void listen(const posts::display_event<posts::display_event_mode::tutorial_text>& t) override {
 		_level.set_string(t.level);
 
@@ -184,25 +208,30 @@ public:
 				std::cout << "warning: some words had to be truncated to fit on screen" << std::endl;
 
 			_tutorial_textl2.set_string(util::strip(line));
-		} else {
+		}
+		else {
 			_tutorial_textl1.set_string("");
 			_tutorial_textl2.set_string(util::strip(line));
 		}
 	}
 
+	// prevent window resize
+	// prevention is handled when the window was instantiated, after this point to OS has full control
 	virtual void listen(const event::sf_event::Resized& t) override {
 		std::cout << "warning: illegal view resize not disabled by WM" << std::endl;
 	}
 
+	// simulate button hover on window key press
+	// trigger AC/NEXT/NOP button
 	virtual void listen(const event::sf_event::KeyPressed& t) override {
-		// trigger button 1
 		if (t.value.key.code == sf::Keyboard::Space) {
 			_aux_btns[0].simulate_click_pressed();
 		}
 	}
 
+	// simulate button click on window key release
+	// trigger AC/NEXT/NOP button
 	virtual void listen(const event::sf_event::KeyReleased& t) override {
-		// trigger button 1
 		if (t.value.key.code == sf::Keyboard::Space) {
 			_aux_btns[0].simulate_click_released();
 		}
@@ -210,7 +239,8 @@ public:
 };
 
 int main(int argc, char* argv[]) {
-	// asynchronous loading for so few resources is uncessiary
+
+	// asynchronous loading for so few resources is unessisary
 	resource_manager<sf::Image>::load("favicon", "res/favicon.jpg");
 	resource_manager<sf::Font>::load("roboto", "res/Roboto-Thin.ttf");
 

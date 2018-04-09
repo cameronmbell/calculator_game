@@ -1,10 +1,12 @@
-// an interface for posting and handling/listening to events
-// a simple vative of existing event libraries, namely:
-// events - https://github.com/LB--/events
-// Events - https://github.com/Submanifold/Events
-// events - https://github.com/MCGallaspy/events
-//
-// ! there's nothing stopping this from running on a separate input thread!
+/*
+ * event.hpp
+ * an interface for posting and listening to events across classes
+ * the event system is single threaded but could easily be pareleised
+ * a naieve culmination of the ideas in many existing event libraries, namely:
+ * events - https://github.com/LB--/events
+ * Events - https://github.com/Submanifold/Events
+ * events - https://github.com/MCGallaspy/events
+ */
 
 #ifndef _EVENT_HPP
 #define _EVENT_HPP
@@ -30,7 +32,7 @@ namespace event
 
 	// a way of separating the union of sf::Events into separate types
 	// provides a way of listening to sf events
-	// ! creates a messy interface
+	// unfortunatly this creates a messy interface
 	template <sf::Event::EventType E>
 	struct sf_typed_event {
 		sf_typed_event(const sf::Event& e, sf::RenderWindow* rw_arg)
@@ -48,7 +50,7 @@ namespace event
 	class dispatch;
 
 	// a connection between dispatch and listener
-	// it can break it's own connection
+	// a connection can break itself, meaning ignore future event dispatches
 	template <typename T>
 	class connection {
 	public:
@@ -89,8 +91,7 @@ namespace event
 		}
 		// connect for class_listener, really the same as for a lambda_listener
 		// except have to get an std::mem_fun to be called from within a lambda
-		// ! may have a performance hit...
-		// ! may break result in dangling ptr...
+		// need to consider both the performance of this and potential for dangling pointer
 		static connection<T> connect(class_listener<T>* thing) {
 			return connect([thing](const T& t) -> void {
 				std::mem_fun(&class_listener<T>::listen)(thing, t);
@@ -120,12 +121,12 @@ namespace event
 		static std::unordered_map<std::size_t, lambda_listener<T>> _listeners;
 	};
 
-	// little dodgy trick that allows separate data for dispatch of each type
+	// little trick that allows separate data for dispatch of each type
 	template <typename T> std::size_t dispatch<T>::_id;
 	template <typename T> std::unordered_map<std::size_t, lambda_listener<T>> dispatch<T>::_listeners;
 
 	// create overloads of on_event() for each type passed to class_listener
-	// from MCGallaspy's events (recursive template inheritance O_O )
+	// idea from MCGallaspy's events (recursive template inheritance for type overloading)
 	template <>
 	class class_listener<> { };
 
@@ -137,7 +138,7 @@ namespace event
 	public:
 
 		// this will actually establish a connection for each template param
-		// but all these connections have the same id, for some reason...
+		// but all these connections have the same id, which doesn't really matter
 		explicit class_listener()
 			: _connection(dispatch<T>::connect(this)) {
 		};
@@ -152,7 +153,7 @@ namespace event
 		connection<T> _connection;
 	};
 
-	// just make the interface a bit nicer
+	// to create a nicer interface around sf_typed_event
 	namespace sf_event {
 		using Closed=sf_typed_event<sf::Event::EventType::Closed>;
 		using Resized=sf_typed_event<sf::Event::EventType::Resized>;
@@ -178,47 +179,6 @@ namespace event
         using TouchEnded=sf_typed_event<sf::Event::EventType::TouchEnded>;
         using SensorChanged=sf_typed_event<sf::Event::EventType::SensorChanged>;
 	};
-
-	// a function to get the data from the type enum of an sf::Event
-	// not actually used, but might be handy - but cant exist since C++11 no decltype(auto)
-	//template <sf::Event::EventType E>
-	//static constexpr auto __event_data(sf::Event& e) noexcept {
-	//	switch (E) {
-	//		case sf::Event::EventType::Resized:
-	//			return e.size;
-	//		case sf::Event::EventType::TextEntered:
-	//			return e.text;
-	//		case sf::Event::EventType::KeyPressed:
-	//			return e.key;
-	//			return e.key;
-	//		case sf::Event::EventType::MouseWheelMoved:
-	//			return e.mouseWheel;
-	//		case sf::Event::EventType::MouseWheelScrolled:
-	//			return e.mouseWheelScroll;
-	//		case sf::Event::EventType::MouseButtonPressed:
-	//		case sf::Event::EventType::MouseButtonReleased:
-	//			return e.mouseButton;
-	//		case sf::Event::EventType::MouseMoved:
-	//			return e.mouseMove;
-	//		case sf::Event::EventType::JoystickButtonPressed:
-	//		case sf::Event::EventType::JoystickButtonReleased:
-	//			return e.joystickButton;
-	//		case sf::Event::EventType::JoystickMoved:
-	//			return e.joystickMove;
-	//		case sf::Event::EventType::JoystickConnected:
-	//		case sf::Event::EventType::JoystickDisconnected:
-	//			return e.joystickConnect;
-	//		case sf::Event::EventType::TouchBegan:
-	//		case sf::Event::EventType::TouchEnded:
-	//		case sf::Event::EventType::TouchMoved:
-	//			return e.touch;
-	//		case sf::Event::EventType::SensorChanged:
-	//			return e.sensor;
-	//		default:
-	//			return nullptr;
-	//	}
-	//}
-
-}
+};
 
 #endif // _EVENTS_HPP
