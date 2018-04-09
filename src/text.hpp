@@ -4,6 +4,7 @@
 #include <SFML/Graphics.hpp>
 
 #include <iostream>
+#include <cmath>
 
 using text_align_t=int;
 
@@ -44,6 +45,8 @@ public:
 				x = _bounds.left + (_bounds.width / 2) - (local.width / 2);
 				break;
 			default:
+				x = _bounds.left; // @TODO FIXXX
+				break;
 				throw std::logic_error("invalid horizontal text alignment: " + std::to_string(_alignment & text_align::horizonal_mask));
 				break;
 		}
@@ -59,6 +62,8 @@ public:
 				y = _bounds.top + (_bounds.height / 2) - (local.height / 2);
 				break;
 			default:
+				y = _bounds.top; // @TODO FIXXX
+				break;
 				throw std::logic_error("invalid vertical text alignment: " + std::to_string(_alignment & text_align::vertical_mask));
 				break;
 		}
@@ -103,7 +108,7 @@ public:
 		update_alignment();
 	}
 
-	void draw(sf::RenderTarget& target, sf::RenderStates states) const {
+	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override {
 		target.draw(_text);
 
 //		auto bounds = _text.getGlobalBounds();
@@ -124,7 +129,16 @@ public:
 //		target.draw(rect);
 	};
 
-private:
+	std::string get_string() const {
+		return _text.getString();
+	}
+
+	std::size_t get_fitting_characters() const {
+		return std::floor(_bounds.width / _text.getCharacterSize() * 1.8f /* approx ratio of font height to width */);
+	};
+
+
+protected:
 	sf::Text _text;
 	sf::FloatRect _bounds;
 	text_align_t _alignment;

@@ -4,7 +4,7 @@
 
 function init {
 	mkdir -p build && cd build
-	cmake -G "Unix Makefiles" ..
+	cmake -G "Unix Makefiles"  ..
 }
 
 function build {
@@ -35,6 +35,8 @@ else
 		init
 		build
 		echo '*** RUNNING ***' && run
+	else
+		echo 'did nothing...'
 	fi
 fi
 

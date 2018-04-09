@@ -15,6 +15,7 @@ namespace core {
 		virtual std::unique_ptr<sf::RenderWindow> setup() {
 			return util::make_unique<sf::RenderWindow>(sf::VideoMode::getDesktopMode(), "my app", sf::Style::Default);
 		}
+
 		virtual void update(sf::RenderWindow* rw, float dt)=0;
 	};
 

@@ -23,12 +23,13 @@ file(COPY ${DATA} DESTINATION res)
 # start handling dependencies
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules" ${CMAKE_MODULE_PATH})
 
-# lpthreads on windows/linux for the std::thread interface
-set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
-
-find_package(Threads REQUIRED)
-
-target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
+# NO LONGER USED:
+# # lpthreads on windows/linux for the std::thread interface
+# set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+# 
+# find_package(Threads REQUIRED)
+# 
+# target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
 
 # need SFML for cross-platform graphics, sound and windowing
 find_package(SFML 2 REQUIRED COMPONENTS network audio graphics window system)
@@ -38,15 +39,15 @@ if (SFML_FOUND)
 	target_link_libraries(${PROJECT_NAME} ${SFML_LIBRARIES} ${SFML_DEPENDENCIES})
 endif()
 
-# for direct gl class, used internally by SFML so this should always be available
-find_package(OpenGL REQUIRED)
-
-include_directories(${OPENGL_INCLUDE_DIR})
-
-if (OPENGL_FOUND)
-	target_link_libraries(${PROJECT_NAME} ${OPENGL_gl_LIBRARY})
-
-	# needed if using math.h
-	# not used yet:
-	# target_link_libraries(${EXECUTABLE_NAME} m)
-endif()
+# NO LONGER USED:
+# # for direct gl class, used internally by SFML so this should always be available
+# find_package(OpenGL REQUIRED)
+#
+# include_directories(${OPENGL_INCLUDE_DIR})
+#
+# if (OPENGL_FOUND)
+#	target_link_libraries(${PROJECT_NAME} ${OPENGL_gl_LIBRARY})
+#
+#	# needed if using math.h
+#	# target_link_libraries(${EXECUTABLE_NAME} m)
+#endif()

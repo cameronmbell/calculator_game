@@ -5,6 +5,7 @@
 
 #include <SFML/Graphics.hpp>
 
+#include <vector>
 #include <utility>
 #include <memory>
 #include <string>
@@ -12,9 +13,9 @@
 namespace util {
 
 	// unique_ptr function factory (part of the C++14 standard)
-	template <typename T, typename... Tp>
+	template <typename T, typename Q=T, typename... Tp>
 	std::unique_ptr<T> make_unique(Tp&&... args) {
-		return std::unique_ptr<T>(new T(std::forward<Tp>(args)...));
+		return std::unique_ptr<T>(new Q(std::forward<Tp>(args)...));
 	}
 
 	// int -> string of certain width, for text fields
@@ -23,7 +24,17 @@ namespace util {
 	// string -> int
 	int from_string(std::string str);
 
-	sf::Vector2f get_text_size(const sf::Text& t);
+	// split a string by a certain character
+	std::vector<std::string> split(const std::string& what, char by=' ');
+
+	// remove trailing whitespace from string
+	std::string rstrip(std::string s);
+
+	// remove leading whitespace from string
+	std::string lstrip(std::string s);
+
+	// remove leading/trailing whitespace from string
+	std::string strip(std::string s);
 };
 
 #endif // _UTIL_HPP

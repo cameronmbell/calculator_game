@@ -1,0 +1,2 @@
+int "level" 23
+bool "sfx" false

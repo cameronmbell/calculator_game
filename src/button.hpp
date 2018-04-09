@@ -40,9 +40,16 @@ class basic_button :
 		event::sf_event::MouseButtonReleased> {
 
 public:
+	basic_button() : basic_button(button_style::default_grey) { }
+
 	basic_button(const button_style& style)
-		: _style(style), _state(button_state::normal),
-		_shape(), _text(), _fade_progress(1.0f) {
+		: _state(button_state::normal), _shape(), _text(), _enabled(true), _fade_progress(1.0f) {
+		set_style(style);
+		set_state(button_state::normal);
+	};
+
+	void set_style(button_style style) {
+		_style = style;
 
 		_shape.setOutlineColor(_style.outline_colour);
 		_shape.setOutlineThickness(_style.outline_thickness);
@@ -52,8 +59,9 @@ public:
 		_text.set_alignment(_style.text_alignment);
 		_text.set_colour(_style.text_colour);
 
-		set_state(button_state::normal);
-	};
+		_fade_progress = 1.0f;
+		_rect_target_colour = _style.fill_colour.at(button_state::normal);
+	}
 
 	void set_state(button_state state) {
 		_state = state;
@@ -74,6 +82,14 @@ public:
 		_shape.setPosition(bounds.left, bounds.top);
 		_shape.setSize(sf::Vector2f(bounds.width - _style.internal_padding, bounds.height - _style.internal_padding));
 		_text.set_bounds(bounds);
+	}
+
+	void enable() {
+		_enabled = true;
+	}
+
+	void disable() {
+		_enabled = false;
 	}
 
 	void set_string(const std::string& str) {
@@ -143,6 +159,9 @@ public:
 	}
 
 	virtual void listen(const event::sf_event::MouseButtonPressed& t) override {
+		if (!_enabled)
+			return;
+
 		if (t.value.mouseButton.button == sf::Mouse::Button::Left) {
 			auto intersects = mouse_intersect(t.rw);
 
@@ -152,6 +171,9 @@ public:
 	}
 
 	virtual void listen(const event::sf_event::MouseButtonReleased& t) override {
+		if (!_enabled)
+			return;
+
 		if (t.value.mouseButton.button == sf::Mouse::Button::Left) {
 			auto intersects = mouse_intersect(t.rw);
 
@@ -163,10 +185,11 @@ public:
 	}
 
 private:
-	const button_style& _style;
+	button_style _style; // ref/ptr would be smarter
 	button_state _state;
 	sf::RectangleShape _shape;
 	aligned_text _text;
+	bool _enabled;
 
 	float _fade_progress;
 	sf::Color _rect_target_colour;
