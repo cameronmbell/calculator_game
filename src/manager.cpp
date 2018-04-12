@@ -106,70 +106,116 @@ namespace {
 		_lm_max_index = 0; // highest level ever reached
 
 	// definition of all levels:
+	using namespace default_operation;
 	std::vector<std::shared_ptr<level>> _lm_lvls ({
 		std::make_shared<level>(level{
 			{ "below is a grid of buttons, click 'next'", "next" },
 			{ "once you enter the game those will look different", "next" },
 			{ "for example it might say +1 which means add one", "next" },
-			{ "there will be four pieces of text, these are..", "next" },
+			{ "that will add one to the big number", "next" },
+			{ "that number will be where this text is", "next" },
+			{ "above that there will be four pieces of text..", "next" },
 			{ "'level' is how far through the game you are", "next" },
 			{ "'moves' is how many moves you can do before you lose", "next" },
 			{ "'target' is what number you need to try get to", "next" },
-			{ "the main text shows what you're currently on", "next" },
+			{ "once you finish a level press the orange NEXT", "next" },
+			{ "if you mess up press to orange AC to restart", "next" },
 			{ "hopefully that helps!", "got it" }
 		}),
 
 		std::make_shared<level>(level{
-			{ "hey there!", "hi" },
-			{ "can you help me?", "sure" },
-			{ "the engineers who designed me was very lazy", "next" },
-			{ "the only way I can calculate is with your help", "okay" },
-			{ "I'll give you a number and a target", "okay" },
-			{ "you need to press buttons to get to the target", "okay" },
+			{ "", "click me" },
+			{ "hello", "hi" },
+			{ "I'm a calculator", "okay" },
+			{ "and I need your help", "okay" },
+			{ "are you up for it?", "sure" },
+			{ "great! I'll give you a starting number", "okay" },
+			{ "and you need to reach the target number", "next" },
+			{ "the target number will be in the top right", "next" },
+			{ "to get to it you need to press buttons", "next" },
+			{ "if the button said '+1' it would add one", "next" },
+			{ "you also have a limited number of moves to reach the target", "next" },
+			{ "if you mess up press the orange AC to reset", "next" },
+			{ "once you finish a level click the orange NEXT", "next" },
+			{ "if you want to change level click MODE", "next" },
+			{ "and for more help click HELP", "next" },
 			{ "oh here's a problem now...", "" }
 		}),
 
-		std::make_shared<level>(0, 3, 3, make_operations(default_operation::add(1))),
+		std::make_shared<level>(0, 3, 3, make_operations(add(1))),
 
 		std::make_shared<level>(level{
-			{ "you're already a master", "thanks" },
+			{ "looks like you're already a master", "thanks" },
 			{ "see if you can do these...", "" }
 		}),
 
 		// starting number, moves allowed, target number, ....
-		std::make_shared<level>(2, 2, 5, make_operations(default_operation::add(1), default_operation::add(2))),
-		std::make_shared<level>(5, 3, 21, make_operations(default_operation::add(7), default_operation::add(2))),
-		std::make_shared<level>(10, 5, 2, make_operations(default_operation::sub(7), default_operation::add(2))),
-		std::make_shared<level>(-3, 3, -4, make_operations(default_operation::sub(2), default_operation::add(3))),
-		std::make_shared<level>(0, 3, 8, make_operations(default_operation::mul(3), default_operation::add(2))),
-		std::make_shared<level>(3, 4, -16, make_operations(default_operation::mul(-2), default_operation::add(2))),
-		std::make_shared<level>(4, 3, 126, make_operations(default_operation::mul(6), default_operation::sub(3))),
-		std::make_shared<level>(7, 4, 56, make_operations(default_operation::mul(-4), default_operation::add(7))),
-		std::make_shared<level>(100, 3, 5, make_operations(default_operation::divi(5), default_operation::add(5))),
-		std::make_shared<level>(52, 3, 12, make_operations(default_operation::divi(2), default_operation::sub(2))),
+		std::make_shared<level>(2, 2, 5, make_operations(add(1), add(2))),
+		std::make_shared<level>(5, 3, 21, make_operations(add(7), add(2))),
+		std::make_shared<level>(10, 5, 2, make_operations(sub(7), add(2))),
+		std::make_shared<level>(-3, 3, -4, make_operations(sub(2), add(3))),
+		std::make_shared<level>(0, 3, 8, make_operations(mul(3), add(2))),
+		std::make_shared<level>(3, 4, -16, make_operations(mul(-2), add(2))),
+		std::make_shared<level>(4, 3, 126, make_operations(mul(6), sub(3))),
+		std::make_shared<level>(7, 4, 56, make_operations(mul(-4), add(7))),
+		std::make_shared<level>(100, 3, 5, make_operations(divi(5), add(5))),
+		std::make_shared<level>(52, 3, 12, make_operations(divi(2), sub(2))),
+		std::make_shared<level>(-3, 4, 190, make_operations(mul(5), add(10), add(3))),
+		std::make_shared<level>(2, 3, 256, make_operations(power(2))),
+		std::make_shared<level>(0, 3, 9, make_operations(power(2), sub(1), sub(2))),
 
 		std::make_shared<level>(level{
 			{ "you seem to know your arithmetic pretty well", "thanks" },
 			{ "but there's more to a calculator than just that", "like?" },
-			{ "A new button has been added... good luck", "" }
+			{ "a new button has been added... good luck", "" }
 		}),
 
-		std::make_shared<level>(2, 3, 2112, make_operations(default_operation::cat(1), default_operation::cat(2))),
-		std::make_shared<level>(0, 4, 42, make_operations(default_operation::cat(1), default_operation::mul(2))),
-		std::make_shared<level>(25, 4, 111, make_operations(default_operation::cat(5), default_operation::divi(5))),
-		std::make_shared<level>(3, 5, 8, make_operations(default_operation::cat(2), default_operation::divi(-4), default_operation::sub(5))),
+		std::make_shared<level>(2, 3, 2112, make_operations(cat(1), cat(2))),
+		std::make_shared<level>(8, 4, 888, make_operations(cat(2), add(6))),
+		std::make_shared<level>(0, 4, 42, make_operations(cat(1), mul(2))),
+		std::make_shared<level>(0, 10, 1011010, make_operations(cat(0), add(1))),
+		std::make_shared<level>(25, 4, 111, make_operations(cat(5), divi(5))),
+		std::make_shared<level>(3, 4, -5, make_operations(cat(2), add(4), divi(-4))),
+		std::make_shared<level>(3, 5, 8, make_operations(cat(2), divi(-4), sub(5))),
+		std::make_shared<level>(0, 3, 144, make_operations(power(2), sub(1), cat(2))),
 
 		std::make_shared<level>(level{
-			{ "you can add numbers, but also delete them", "" }
+			{ "that button adds number, this new button deletes them", "" }
 		}),
 
-		std::make_shared<level>(123, 3, 2, make_operations(default_operation::del(), default_operation::mul(2))),
+		std::make_shared<level>(111, 2, 1, make_operations(del())),
+		std::make_shared<level>(123, 3, 2, make_operations(del(), mul(2))),
+		std::make_shared<level>(-25, 3, -9, make_operations(del(), sub(6))),
+		std::make_shared<level>(0, 6, -5, make_operations(del(), cat(2), sub(6))),
 
 		std::make_shared<level>(level{
-			{ "thanks to you all the customers questions have been solved", "yay" },
-			{ "and the engineers had time to fix me", "phew" },
-			{ "well, this is goodbye", "bye" },
+			{ "one more button has been added, good luck!", "" }
 		}),
+
+		std::make_shared<level>(-5, 1, 5, make_operations(sign_invert())),
+		std::make_shared<level>(0, 3, -6, make_operations(sign_invert(), add(4), add(2))),
+		std::make_shared<level>(0, 4, -13, make_operations(sign_invert(), add(3), sub(7))),
+		std::make_shared<level>(0, 4, 60, make_operations(sign_invert(), add(5), sub(10), mul(4))),
+		std::make_shared<level>(44, 5, 52, make_operations(sign_invert(), add(9), divi(2), mul(4))),
+		std::make_shared<level>(9, 5, 10, make_operations(sign_invert(), add(5), mul(5))),
+
+		std::make_shared<level>(level{
+			{ "there are only a few questions left", "wow" },
+			{ "you could actually win this thing", "phew" },
+			{ "good luck...", "" }
+		}),
+
+		std::make_shared<level>(14, 5, 12, make_operations(sign_invert(), cat(6), add(5), divi(8))),
+		std::make_shared<level>(55, 4, 13, make_operations(sign_invert(), del(), add(9))),
+		std::make_shared<level>(0, 5, 245, make_operations(sign_invert(), cat(5), sub(3), mul(4))),
+		std::make_shared<level>(39, 4, 12, make_operations(sign_invert(), mul(-3), divi(3), add(9))),
+		std::make_shared<level>(111, 6, 126, make_operations(sign_invert(), del(), mul(3), sub(9))),
+
+		std::make_shared<level>(level{
+			{ "thanks to you all the questions have been solved", "yay!" },
+			{ "you're pretty great!", "thanks" },
+			{ "well, I have to go... bye!", "cya" }
+		})
 	});
 };
 
@@ -280,7 +326,7 @@ namespace posts {
 		void set_generic_ac() {
 			posts::operations::set_aux<AutoDispatch>(make_operations(
 					default_operation::ac(),
-					default_operation::nop(),
+					default_operation::help(),
 					default_operation::settings()));
 		}
 
@@ -289,7 +335,7 @@ namespace posts {
 		void set_generic_next() {
 			posts::operations::set_aux<AutoDispatch>(make_operations(
 					default_operation::next(),
-					default_operation::nop(),
+					default_operation::help(),
 					default_operation::settings()));
 		}
 
@@ -365,6 +411,11 @@ void level::run() {
 // level 0 represents the instructions screen
 void level::load() {
 	_lm_index = _lm_max_index = 1;
+
+	// even though it shouldn't really be possible
+	// the game is a little more fun when you can skip a level
+	_lm_max_index = _lm_lvls.size() - 2;
+
 	level::run();
 }
 
@@ -403,7 +454,7 @@ void level::load_instructions() {
 
 	// reset to the last (highest) level
 	// somewhat problematic, but far simpler than an alt solution
-	_lm_index = _lm_max_index;
+	_lm_index = _lm_max_index - 1;
 }
 
 // re-run the current level

@@ -177,13 +177,22 @@ namespace default_operation {
 		std::function<void(untyped* self)> _f;
 	};
 
+	class help : public text {
+	public:
+		help() : text("HELP") { }
+
+		virtual void call(level* l) override {
+			level::load_instructions();
+		}
+	};
+
 	// the settings operation
 	// change the display and allow for the level to be changed
 	class settings : public basic_operation {
 	public:
 		settings()=default;
 
-		virtual std::string get_string() const noexcept override { return "SET"; }
+		virtual std::string get_string() const noexcept override { return "MODE"; }
 		virtual void call(level* l) override { settings::instantiate(); }
 
 		// change the screen to display various lambda buttons
@@ -212,7 +221,7 @@ namespace default_operation {
 			// EXIT quits execution
 			posts::operations::set_central(make_operations(
 				untyped("<", [](untyped* self) -> void { level::run(); }),
-				untyped("HELP", [](untyped* self) -> void { level::load_instructions(); }),
+				nop(),
 				untyped("EXIT", [](untyped* self) -> void { std::exit(0); })
 			));
 		};
@@ -352,10 +361,12 @@ namespace default_operation {
 			on *= sign;
 
 			int _data_cpy = _n;
-			for (; _data_cpy != 0; _data_cpy /= 10) {
+			do {
 				on *= 10;
 				on += _n % 10;
-			}
+
+				_data_cpy /= 10;
+			} while (_data_cpy != 0);
 
 			return on * sign;
 		}
