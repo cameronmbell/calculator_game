@@ -6,7 +6,7 @@
 #include "button.hpp"
 
 const button_style button_style::default_orange = {
-	text_align::center | text_align::middle, sf::Color::White, // text properties
+	text_align::center | text_align::middle, sf::Color::White, // text properties (centered white text)
 	sf::Color::Black, 1.0f, // outline colour and outline thickness
 	{
 		{ button_state::normal, sf::Color(248, 123, 15) },
@@ -18,7 +18,7 @@ const button_style button_style::default_orange = {
 };
 
 const button_style button_style::default_grey = {
-	text_align::center | text_align::middle, sf::Color::Black, // text properties
+	text_align::center | text_align::middle, sf::Color::Black, // text properties (centered black text)
 	sf::Color::Black, 1.0f, // outline colour and outline thickness
 	{
 		{ button_state::normal, sf::Color(210, 210, 210) },

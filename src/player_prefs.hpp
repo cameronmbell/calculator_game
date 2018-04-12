@@ -1,4 +1,0 @@
-#ifndef _PLAYER_PREFS_HPP
-#define _PLAYER_PREFS_HPP
-
-#endif // _PLAYER_PREFS_HPP

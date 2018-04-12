@@ -1,8 +1,8 @@
 /*
  * event.hpp
  * an interface for posting and listening to events across classes
- * the event system is single threaded but could easily be pareleised
- * a naieve culmination of the ideas in many existing event libraries, namely:
+ * the event system is single threaded but could easily be parallelised
+ * a naive culmination of the ideas in many existing event libraries, namely:
  * events - https://github.com/LB--/events
  * Events - https://github.com/Submanifold/Events
  * events - https://github.com/MCGallaspy/events
@@ -32,7 +32,7 @@ namespace event
 
 	// a way of separating the union of sf::Events into separate types
 	// provides a way of listening to sf events
-	// unfortunatly this creates a messy interface
+	// unfortunately this creates a messy interface
 	template <sf::Event::EventType E>
 	struct sf_typed_event {
 		sf_typed_event(const sf::Event& e, sf::RenderWindow* rw_arg)
@@ -78,7 +78,7 @@ namespace event
 		dispatch()=delete;
 
 		// push a lambda_listener onto the list of listeners, so that it
-		// recieves events from any post on dispatch of T type
+		// receives events from any post on dispatch of T type
 		// also return the id of this connection, so connections can break
 		static constexpr connection<T> connect(lambda_listener<T> thing) {
 			_listeners[_id] = thing;
@@ -89,6 +89,7 @@ namespace event
 
 			return ret_val;
 		}
+
 		// connect for class_listener, really the same as for a lambda_listener
 		// except have to get an std::mem_fun to be called from within a lambda
 		// need to consider both the performance of this and potential for dangling pointer
@@ -137,7 +138,7 @@ namespace event
 	class class_listener<T> {
 	public:
 
-		// this will actually establish a connection for each template param
+		// this will actually establish a connection for each template parameter
 		// but all these connections have the same id, which doesn't really matter
 		explicit class_listener()
 			: _connection(dispatch<T>::connect(this)) {

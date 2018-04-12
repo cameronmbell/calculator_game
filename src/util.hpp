@@ -1,4 +1,7 @@
-// helper functions not provided by the C++11 STL
+/*
+ * util.cpp:
+ * a set of utility functions, not provided by the C++11 STL
+ */
 
 #ifndef _UTIL_HPP
 #define _UTIL_HPP
@@ -12,7 +15,8 @@
 
 namespace util {
 
-	// unique_ptr function factory (part of the C++14 standard)
+	// unique_ptr function factory (part of the C++14 standard, but not C++11)
+	// acts the same as make_shared
 	template <typename T, typename Q=T, typename... Tp>
 	std::unique_ptr<T> make_unique(Tp&&... args) {
 		return std::unique_ptr<T>(new Q(std::forward<Tp>(args)...));

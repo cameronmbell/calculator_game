@@ -1,6 +1,6 @@
 /*
  * core.hpp:
- * create a 'runnable' interface representitive of a class that is attached to an SFML window
+ * create a 'runnable' interface representative of a class that is attached to an SFML window
  */
 
 #ifndef _CORE_HPP
@@ -15,7 +15,7 @@ namespace core {
 	class runnable {
 	public:
 
-		// overridable window generator, acts as program init
+		// override-able window generator, acts as program initializer
 		virtual std::unique_ptr<sf::RenderWindow> setup() {
 			return util::make_unique<sf::RenderWindow>(sf::VideoMode::getDesktopMode(), "my app", sf::Style::Default);
 		}

@@ -1,6 +1,6 @@
 /*
  * core.cpp:
- * disptach events on update and make calls to runnable object
+ * dispatch events on update and make calls to runnable object
  */
 
 #include "core.hpp"
@@ -17,6 +17,7 @@ namespace core {
 
 			// dispatch SFML driven events through the event manager
 			// these can be handled by any class for whatever reason
+			// when no one is listening to a specific event it has minimal performance hit
 			auto e = sf::Event();
 			while (win->pollEvent(e)) {
 				switch (e.type) {
@@ -59,6 +60,8 @@ namespace core {
 					case sf::Event::Resized:
 						event::dispatch<event::sf_event::Resized>::post(event::sf_event::Resized(e, win.get()));
 
+						// it's sub-optimal when a window is resized
+						// but when it happens do not rescale everything
 						win->setView(sf::View(sf::FloatRect(0.0f, 0.0f, static_cast<float>(e.size.width), static_cast<float>(e.size.height))));
 						break;
 					case sf::Event::JoystickButtonPressed:
@@ -96,7 +99,7 @@ namespace core {
 				}
 			}
 
-			// draw and recalculate dt
+			// draw and recalculate delta time from the clock
 			win->clear(sf::Color::Black);
 			r.update(win.get(), clk.restart().asSeconds());
 			win->display();

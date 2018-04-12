@@ -1,4 +1,4 @@
-/* 
+/*
  * main.cpp:
  * manages rendering the game and maintaining the render window
  * does so by listening to events posted by the manager and reacting
@@ -17,7 +17,7 @@
 #include "core.hpp"
 #include "util.hpp"
 
-// class resonsible for rendering the game
+// class responsible for rendering the game
 // instantiated and called by core.hpp
 class game_renderer :
 	public core::runnable,
@@ -27,7 +27,7 @@ class game_renderer :
 	event::sf_event::KeyReleased, // simulate button click on window key release
 	posts::display_event<posts::display_event_mode::normal_text>, // modify primary/moves/level/target text
 	posts::display_event<posts::display_event_mode::tutorial_text>, // modify line1/line2/level text
-	posts::display_event<posts::display_event_mode::operations_aux>, // replace existing auxilery buttons
+	posts::display_event<posts::display_event_mode::operations_aux>, // replace existing auxiliary buttons
 	posts::display_event<posts::display_event_mode::operations_central>, // replace existing central buttons
 	posts::display_event<posts::display_event_mode::operations_redraw>, // re-calculate button strings
 	posts::display_event<posts::display_event_mode::disable>> { // disable tutorial/numeric text objects
@@ -67,7 +67,7 @@ public:
 
 		auto win = util::make_unique<sf::RenderWindow>(vmode, "my_game", sf::Style::Titlebar | sf::Style::Close, cset);
 
-		// optimial resolution for text rendering (as tested) is 640x480
+		// optimal resolution for text rendering (as tested) is 640x480
 		// hence 0.5 * ((x/640) + (y/480))
 		// hence (2x + 4y) / 1920*2
 		float font_scale_factor = (3.0f * win->getSize().x + 4.0f * win->getSize().x) / 3840.0f;
@@ -98,7 +98,7 @@ public:
 		}
 
 		for (auto it : { &_primary, &_moves, &_level, &_target, &_tutorial_textl1, &_tutorial_textl2 }) {
-			it->set_font(resource_manager<sf::Font>::get("roboto"), static_cast<unsigned int>(18 * font_scale_factor));
+			it->set_font(resource_manager<sf::Font>::get("roboto"), static_cast<unsigned int>(24 * font_scale_factor));
 			it->set_bounds(sf::FloatRect(16, 16, win->getSize().x - 32, win->getSize().y / 4 - 32));
 			it->set_flash_mode(flash_mode::none);
 			it->set_colour(sf::Color::White);
@@ -141,14 +141,14 @@ public:
 			_tutorial_textl2.update(dt); rw->draw(_tutorial_textl2);
 			_level.update(dt); rw->draw(_level);
 		}
-	}; 
+	};
 
 	// replace existing central buttons
 	virtual void listen(const posts::display_event<posts::display_event_mode::operations_central>& t) override {
 		_set_buttons(_cental_btns, t.operations);
 	}
 
-	// replace existing auxilery buttons
+	// replace existing auxiliary buttons
 	virtual void listen(const posts::display_event<posts::display_event_mode::operations_aux>& t) override {
 		_set_buttons(_aux_btns, t.operations);
 	}
@@ -171,6 +171,14 @@ public:
 
 	// modify primary/moves/level/target text
 	virtual void listen(const posts::display_event<posts::display_event_mode::normal_text>& t) override {
+		_primary.remove_alt_string();
+
+		// set alter string
+		// meaning: what to change between when flashing
+		// e.g. WIN -> 1234 -> WIN -> 1234....
+		if (t.alt != "")
+			_primary.set_alt_string(t.alt);
+
 		_level.set_string(t.level);
 		_moves.set_string(t.moves);
 		_target.set_string(t.target);
@@ -188,28 +196,35 @@ public:
 	virtual void listen(const posts::display_event<posts::display_event_mode::tutorial_text>& t) override {
 		_level.set_string(t.level);
 
+		// how many character can fit within a single line (assuming line1 is congruent to line2)
+		// then split the input string by space
 		auto fitting_chars = _tutorial_textl1.get_fitting_characters();
 		auto words = util::split(t.value);
 
 		std::size_t index = 0;
 		std::string line = "";
 
+		// keep appending words to the top line till no more can fit
 		while (line.size() < fitting_chars && index < words.size())
 			line.append(words[index++] + " ");
 
 		if (index != words.size()) {
 			_tutorial_textl1.set_string(util::strip(line));
 
+			// once again, keep appending till not more can fit
 			line = "";
 			while (line.size() < fitting_chars && index < words.size())
 				line.append(words[index++] + " ");
 
+			// oh no! there is no way around this
+			// long string cannot be rendered
 			if (index != words.size())
 				std::cout << "warning: some words had to be truncated to fit on screen" << std::endl;
 
 			_tutorial_textl2.set_string(util::strip(line));
 		}
 		else {
+			// flip top and bottom line
 			_tutorial_textl1.set_string("");
 			_tutorial_textl2.set_string(util::strip(line));
 		}
@@ -240,9 +255,10 @@ public:
 
 int main(int argc, char* argv[]) {
 
-	// asynchronous loading for so few resources is unessisary
+	// asynchronous loading for so few resources is unnecessary
+	// hence just preload
 	resource_manager<sf::Image>::load("favicon", "res/favicon.jpg");
-	resource_manager<sf::Font>::load("roboto", "res/Roboto-Thin.ttf");
+	resource_manager<sf::Font>::load("roboto", "res/roboto.ttf");
 
 	game_renderer g;
 
